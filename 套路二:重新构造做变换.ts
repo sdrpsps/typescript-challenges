@@ -20,12 +20,12 @@ type UnshiftResult = Unshift<tuple, 8>; // [8, 1, 2, 3]
 // 有这两个元祖，进行合并
 type tuple1 = [1, 2];
 
-type tuple2 = ["hello", "world"];
+type tuple2 = ['hello', 'world'];
 
-type Zip<
-  First extends [unknown, unknown],
-  Second extends [unknown, unknown]
-> = First extends [infer FirstOne, infer FirstTwo]
+type Zip<First extends [unknown, unknown], Second extends [unknown, unknown]> = First extends [
+  infer FirstOne,
+  infer FirstTwo,
+]
   ? Second extends [infer SecondOne, infer SecondTwo]
     ? [[FirstOne, FirstTwo], [SecondOne, SecondTwo]]
     : []
@@ -34,54 +34,42 @@ type Zip<
 type ZipResult = Zip<tuple1, tuple2>; // [[1, 2], ["hello", "world"]]
 
 // 但是这样只能合并两个元素的元祖，如果需要任意数量就需要递归
-type Zip2<First extends unknown[], Second extends unknown[]> = First extends [
-  infer FirstOne,
-  ...infer FirstRest
-]
+type Zip2<First extends unknown[], Second extends unknown[]> = First extends [infer FirstOne, ...infer FirstRest]
   ? Second extends [infer SecondOne, ...infer SecondRest]
     ? [[FirstOne, SecondOne], ...Zip2<FirstRest, SecondRest>]
     : []
   : [];
 
-type Zip2Result = Zip2<[1, 2, 3, 4], ["hello", "world", "every", "one"]>; // [[1, "hello"], [2, "world"], [3, "every"], [4, "one"]]
+type Zip2Result = Zip2<[1, 2, 3, 4], ['hello', 'world', 'every', 'one']>; // [[1, "hello"], [2, "world"], [3, "every"], [4, "one"]]
 
 /**
  * 字符串类型的重新构造
  */
 // 想把一个字符串字面量类型的转为首字母大写
 // Uppercase 是 TypeScript 的内置高级类型
-type CapitalizeStr<Str extends string> =
-  Str extends `${infer First}${infer Rest}`
-    ? `${Uppercase<First>}${Rest}`
-    : Str;
+type CapitalizeStr<Str extends string> = Str extends `${infer First}${infer Rest}` ? `${Uppercase<First>}${Rest}` : Str;
 
-type CapitalizeStrResult = CapitalizeStr<"hello">; // Hello
+type CapitalizeStrResult = CapitalizeStr<'hello'>; // Hello
 
 // 下划线到驼峰形式的转换
-type CamelCase<Str extends string> =
-  Str extends `${infer Left}_${infer Right}${infer Rest}`
-    ? `${Left}${Uppercase<Right>}${CamelCase<Rest>}`
-    : Str;
+type CamelCase<Str extends string> = Str extends `${infer Left}_${infer Right}${infer Rest}`
+  ? `${Left}${Uppercase<Right>}${CamelCase<Rest>}`
+  : Str;
 
-type CamelCaseResult = CamelCase<"hello_world_every_one">; // helloWorldEveryOne
+type CamelCaseResult = CamelCase<'hello_world_every_one'>; // helloWorldEveryOne
 
 // 可以修改自然也可以删除，我们再来做一个删除一段字符串的案例：删除字符串中的某个子串
-type DropSubStr<
-  Str extends string,
-  SubStr extends string
-> = Str extends `${infer Prefix}${SubStr}${infer Suffix}`
+type DropSubStr<Str extends string, SubStr extends string> = Str extends `${infer Prefix}${SubStr}${infer Suffix}`
   ? DropSubStr<`${Prefix}${Suffix}`, SubStr>
   : Str;
 
-type DropSubStrResult = DropSubStr<"!!!HELLO!!!!!", "!">; // HELLO
+type DropSubStrResult = DropSubStr<'!!!HELLO!!!!!', '!'>; // HELLO
 
 /**
  * 函数类型的重新构造
  */
 // 在已有的函数类型上添加一个参数
-type AppendArgument<Func extends Function, Arg> = Func extends (
-  ...args: infer Args
-) => infer ReturnType
+type AppendArgument<Func extends Function, Arg> = Func extends (...args: infer Args) => infer ReturnType
   ? (...args: [...Args, Arg]) => ReturnType
   : never;
 
